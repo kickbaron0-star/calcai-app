@@ -50,6 +50,34 @@ export default function CalcApp() {
   const [error, setError] = useState("");
   const offerteRef = useRef(null);
   const pdfRef = useRef(null);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const sendOfferte = async () => {
+    setSending(true);
+    try {
+      const res = await fetch("/api/send-offerte", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          naam: form.naam,
+          bedrijf: form.bedrijf,
+          email: form.email,
+          telefoon: form.telefoon,
+          projectType: form.projectTypeLabel,
+          location: form.location,
+          offerte: offerte,
+        }),
+      });
+      if (res.ok) {
+        setSent(true);
+        setTimeout(() => setSent(false), 4000);
+      }
+    } catch (e) {
+      console.error("Verzenden mislukt:", e);
+    }
+    setSending(false);
+  };
 
   const downloadPDF = async () => {
     const el = pdfRef.current;
@@ -678,6 +706,14 @@ Gebruik markdown voor opmaak. Wees realistisch met prijzen voor de Nederlandse m
                     onClick={downloadPDF}
                   >
                     ↓ Downloaden
+                  </button>
+                  <button
+                    className="primary-btn"
+                    style={{ fontSize: 14, padding: "12px 20px", background: sent ? "#16a34a" : undefined }}
+                    onClick={sendOfferte}
+                    disabled={sending || sent}
+                  >
+                    {sent ? "✓ Verzonden!" : sending ? "Bezig..." : "✉ Verstuur naar klant"}
                   </button>
                 </div>
               </div>

@@ -10,6 +10,8 @@ const projectTypes = [
   { id: "schilderwerk", label: "Schilderwerk", icon: "🖌️" },
   { id: "vloeren", label: "Vloeren & afwerking", icon: "🪵" },
   { id: "dak", label: "Dakwerk", icon: "🏠" },
+  { id: "stratenmakers", label: "Stratenmakers", icon: "🧱" },
+  { id: "schoonmaak", label: "Schoonmaak", icon: "🧹" },
   { id: "overig", label: "Overig", icon: "⚙️" },
 ];
 
@@ -20,10 +22,11 @@ const urgencyOptions = [
 ];
 
 const scaleSizes = [
-  { id: "klein", label: "Klein", sub: "< €5.000" },
-  { id: "middel", label: "Middel", sub: "€5k – €25k" },
-  { id: "groot", label: "Groot", sub: "€25k – €100k" },
-  { id: "xl", label: "XL", sub: "> €100k" },
+  { id: "mini", label: "Mini", sub: "< €500" },
+  { id: "klein", label: "Klein", sub: "€500 – €2.500" },
+  { id: "middel", label: "Middel", sub: "€2.500 – €10k" },
+  { id: "groot", label: "Groot", sub: "€10k – €50k" },
+  { id: "xl", label: "XL", sub: "> €50k" },
 ];
 
 export default function CalcApp() {

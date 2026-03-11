@@ -1,4 +1,6 @@
 import { useState, useRef } from "react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const STEPS = ["project", "details", "contact", "offerte"];
 
@@ -47,6 +49,45 @@ export default function CalcApp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const offerteRef = useRef(null);
+  const pdfRef = useRef(null);
+
+  const downloadPDF = async () => {
+    const el = pdfRef.current;
+    if (!el) return;
+    try {
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        backgroundColor: "#111111",
+        useCORS: true,
+        logging: false,
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const imgW = pageW - 20;
+      const imgH = (canvas.height * imgW) / canvas.width;
+      let y = 10;
+      let remaining = imgH;
+      let srcY = 0;
+      while (remaining > 0) {
+        const sliceH = Math.min(remaining, pageH - 20);
+        const sliceCanvas = document.createElement("canvas");
+        sliceCanvas.width = canvas.width;
+        sliceCanvas.height = (sliceH / imgH) * canvas.height;
+        const ctx = sliceCanvas.getContext("2d");
+        ctx.drawImage(canvas, 0, srcY * (canvas.height / imgH), canvas.width, sliceCanvas.height, 0, 0, canvas.width, sliceCanvas.height);
+        pdf.addImage(sliceCanvas.toDataURL("image/png"), "PNG", 10, y, imgW, sliceH);
+        remaining -= sliceH;
+        srcY += sliceH;
+        if (remaining > 0) { pdf.addPage(); y = 10; }
+      }
+      const offerteNr = `${Math.floor(Math.random() * 9000) + 1000}-${new Date().getFullYear()}`;
+      pdf.save(`CalcAI-offerte-${offerteNr}.pdf`);
+    } catch (e) {
+      console.error("PDF fout:", e);
+    }
+  };
 
   const update = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
@@ -634,7 +675,7 @@ Gebruik markdown voor opmaak. Wees realistisch met prijzen voor de Nederlandse m
                   <button
                     className="primary-btn"
                     style={{ fontSize: 14, padding: "12px 20px" }}
-                    onClick={() => window.print()}
+                    onClick={downloadPDF}
                   >
                     ↓ Downloaden
                   </button>
@@ -642,7 +683,7 @@ Gebruik markdown voor opmaak. Wees realistisch met prijzen voor de Nederlandse m
               </div>
 
               {/* Offerte card */}
-              <div style={{
+              <div ref={pdfRef} style={{
                 background: "#111",
                 border: "1px solid #222",
                 borderRadius: 12,
